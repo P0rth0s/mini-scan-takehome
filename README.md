@@ -4,7 +4,11 @@
 
 I created a subscriber application and sql database which stand up when `docker compose up` is ran.
 
-You can use `docker compose exec sqlite3 sqlite3 /root/db/your_database.db` to access the sqllite database.
+You can use `docker compose exec sqlite3 sqlite3 /root/db/scans.db` to access the sqllite database.
+
+You can run `SELECT * FROM scans;` to see the scans being inserted
+
+TODO - test timestamp thing, maybe some automated tests if time?
 
 ## Original prompt
 

@@ -35,17 +35,24 @@ services:
     tty: true        # Allocates a pseudo-TTY
     volumes:
       - ./db/:/root/db/ # Persist the db file in a local 'db' folder
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "sleep 5 && sqlite3 /root/db/scans.db < /root/db/database.sql && tail -f /dev/null"]
 
   # Runs the subscriber
   subscriber:
     depends_on:
+      mk-topic:
+        condition: service_completed_successfully
       mk-subscription:
         condition: service_completed_successfully
       sqlite3:
-        condition: service_completed_successfully
+        condition: service_started
     environment:
       PUBSUB_EMULATOR_HOST: pubsub:8085
       PUBSUB_PROJECT_ID: test-project
+      SQLITE_DB_PATH: /root/db/scans.db
+    volumes:
+      - ./db/:/root/db/
     build:
       context: .
       dockerfile: ./cmd/subscriber/Dockerfile
