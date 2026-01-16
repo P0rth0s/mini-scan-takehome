@@ -8,12 +8,19 @@ import (
 	"cloud.google.com/go/pubsub"
 	"github.com/censys/scan-takehome/pkg/database"
 	"github.com/censys/scan-takehome/pkg/scanning"
+	"github.com/go-playground/validator/v10"
 )
 
 func processMessage(m *pubsub.Message, writer database.ScanWriter) error {
 	var scan scanning.Scan
 	if err := json.Unmarshal(m.Data, &scan); err != nil {
 		log.Printf("json.Unmarshal scan: %v", err)
+		return err
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(scan); err != nil {
+		log.Printf("validation error for scan: %v", err)
 		return err
 	}
 
@@ -30,12 +37,18 @@ func processMessage(m *pubsub.Message, writer database.ScanWriter) error {
 		if err := json.Unmarshal(jsonBytes, &data); err != nil {
 			return err
 		}
+		if err := validate.Struct(data); err != nil {
+			return err
+		}
 		str := string(data.ResponseBytesUtf8)
 		log.Printf("V1 Data: %s", str)
 		dataString = str
 	case scanning.V2: // string
 		var data scanning.V2Data
 		if err := json.Unmarshal(jsonBytes, &data); err != nil {
+			return err
+		}
+		if err := validate.Struct(data); err != nil {
 			return err
 		}
 		log.Printf("V2 Data: %+v", data)

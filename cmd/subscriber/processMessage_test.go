@@ -60,7 +60,17 @@ func TestProcessMessage(t *testing.T) {
 	// Process invalid message
 	t.Run("InvalidMessage", func(t *testing.T) {
 		var invalidMessage = &pubsub.Message{
-			Data: []byte(`{"invalid": "json structure"`),
+			Data: func() []byte {
+				scan := scanning.Scan{
+					Ip:          "192.168.1.2",
+					Port:        443,
+					Service:     "https",
+					Timestamp:   1234567891,
+					DataVersion: scanning.V2,
+				}
+				data, _ := json.Marshal(scan)
+				return data
+			}(),
 		}
 		err := processMessage(invalidMessage, mockWriter)
 		if err == nil {
