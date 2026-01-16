@@ -1,4 +1,3 @@
-version: '3'
 services:
 
   # Starts the P/S emulator
@@ -28,6 +27,28 @@ services:
       mk-topic:
         condition: service_completed_successfully
     command: PUT http://pubsub:8085/v1/projects/test-project/subscriptions/scan-sub topic=projects/test-project/topics/scan-topic --ignore-stdin 
+
+  # Creates a sqlite database
+  sqlite3:
+    image: nouchka/sqlite3:latest
+    stdin_open: true # Allows interasction via keyboard input
+    tty: true        # Allocates a pseudo-TTY
+    volumes:
+      - ./db/:/root/db/ # Persist the db file in a local 'db' folder
+
+  # Runs the subscriber
+  subscriber:
+    depends_on:
+      mk-subscription:
+        condition: service_completed_successfully
+      sqlite3:
+        condition: service_completed_successfully
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: test-project
+    build:
+      context: .
+      dockerfile: ./cmd/subscriber/Dockerfile
 
   # Runs the "scanner"
   scanner:

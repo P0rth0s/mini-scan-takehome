@@ -1,5 +1,13 @@
 # Mini-Scan
 
+### Submitter - Lee Deffebach
+
+I created a subscriber application and sql database which stand up when `docker compose up` is ran.
+
+You can use `docker compose exec sqlite3 sqlite3 /root/db/your_database.db` to access the sqllite database.
+
+## Original prompt
+
 Hello!
 
 As you've heard by now, Censys scans the internet at an incredible scale. Processing the results necessitates scaling horizontally across thousands of machines. One key aspect of our architecture is the use of distributed queues to pass data between machines.
